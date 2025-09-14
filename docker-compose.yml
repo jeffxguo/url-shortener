@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=url_shortener_db
+    ports:
+      # You can optionally expose the port to connect with DBeaver
+      - '5433:5432'
+    volumes:
+      # This persists the database data even if the container is removed
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    restart: always
+    ports:
+      - '3001:3001'
+    depends_on:
+      - database
+    # Pass database connection details to the backend
+    environment:
+      - DB_USER=postgres
+      - DB_HOST=database
+      - DB_NAME=url_shortener_db
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_PORT=5432
+
+  frontend:
+    build: ./frontend
+    restart: always
+    ports:
+      # Map port 80 in the container to 5173 on our machine
+      - '5173:80'
+    depends_on:
+      - backend
+
+# Define the named volume for data persistence
+volumes:
+  postgres_data:
