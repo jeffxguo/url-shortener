@@ -35,7 +35,6 @@ async function initializeDatabase() {
   } catch (err) {
     console.error("!!! DATABASE INITIALIZATION FAILED !!!");
     console.error("Error details:", err);
-    // The application can't run without the database, so we exit.
     process.exit(1); 
   }
 }
@@ -60,19 +59,19 @@ app.post('/api/shorten', async (req, res) => {
     }
 
     try {
-        // NEW: First, try to find the long URL in the database
+        // First, try to find the long URL in the database
         const lookupResult = await pool.query('SELECT short_code FROM urls WHERE long_url = $1', [longUrl]);
 
-        // NEW: If it exists, return the existing short URL
+        // If it exists, return the existing short URL
         if (lookupResult.rows.length > 0) {
             const existingShortCode = lookupResult.rows[0].short_code;
             const existingUrl = `http://localhost:${PORT}/${existingShortCode}`;
             
-            // We use status 200 OK because we didn't create a new resource.
+            // Status 200 OK because we didn't create a new resource.
             return res.status(200).json({ shortUrl: existingUrl });
         }
 
-        // EXISTING LOGIC: If it does not exist, create a new one
+        // If it does not exist, create a new one
         const shortCode = generateShortCode();
 
         const insertResult = await pool.query(
@@ -81,7 +80,7 @@ app.post('/api/shorten', async (req, res) => {
         );
         const newUrl = `http://localhost:${PORT}/${insertResult.rows[0].short_code}`;
 
-        // We use status 201 Created because we created a new resource.
+        // Status 201 Created because we created a new resource.
         res.status(201).json({ shortUrl: newUrl });
 
     } catch (err) {
