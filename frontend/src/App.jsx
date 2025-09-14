@@ -19,7 +19,7 @@ function App() {
 
     try {
       // IMPORTANT: The backend is on port 3001
-      const response = await axios.post('http://localhost:3001/api/shorten', {
+      const response = await axios.post('/api/shorten', {
         longUrl: longUrl,
       });
       setShortUrl(response.data.shortUrl);
