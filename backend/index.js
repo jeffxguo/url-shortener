@@ -61,6 +61,8 @@ app.post('/api/shorten', async (req, res) => {
         return res.status(400).json({ error: 'longUrl is required' });
     }
 
+    const publicDomain = process.env.PUBLIC_DOMAIN || `http://localhost:${PORT}`;
+
     try {
         // First, try to find the long URL in the database
         const lookupResult = await pool.query('SELECT short_code FROM urls WHERE long_url = $1', [longUrl]);
@@ -80,7 +82,6 @@ app.post('/api/shorten', async (req, res) => {
             'INSERT INTO urls (long_url, short_code) VALUES ($1, $2) RETURNING short_code',
             [longUrl, shortCode]
         );
-        const publicDomain = process.env.PUBLIC_DOMAIN || `http://localhost:${PORT}`;
         const newUrl = `${publicDomain}/${insertResult.rows[0].short_code}`;
 
         // Status 201 Created because we created a new resource.
