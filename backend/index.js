@@ -68,9 +68,8 @@ app.post('/api/shorten', async (req, res) => {
         // If it exists, return the existing short URL
         if (lookupResult.rows.length > 0) {
             const existingShortCode = lookupResult.rows[0].short_code;
-            const existingUrl = `http://localhost:${PORT}/${existingShortCode}`;
-            
-            // Status 200 OK because we didn't create a new resource.
+            const existingUrl = `${publicDomain}/${existingShortCode}`;
+
             return res.status(200).json({ shortUrl: existingUrl });
         }
 
@@ -81,7 +80,8 @@ app.post('/api/shorten', async (req, res) => {
             'INSERT INTO urls (long_url, short_code) VALUES ($1, $2) RETURNING short_code',
             [longUrl, shortCode]
         );
-        const newUrl = `http://localhost:${PORT}/${insertResult.rows[0].short_code}`;
+        const publicDomain = process.env.PUBLIC_DOMAIN || `http://localhost:${PORT}`;
+        const newUrl = `${publicDomain}/${insertResult.rows[0].short_code}`;
 
         // Status 201 Created because we created a new resource.
         res.status(201).json({ shortUrl: newUrl });
